@@ -110,33 +110,18 @@
       [world objFilename]
       (let [model (yaw.loader/load-model objFilename)]
           (.createMesh world
-                                         (float-array (flatten (:vertices model)))
-                                         (float-array (flat-map (:text_coord model)))
-                                         (float-array (flat-map (:normals model)))
-                                         (int-array (flat-map (:faces model)))
-                                         (int 0) (float-array (first (:rgb model))) (str "/ressources/" (:texture-name model)))))
+                     (float-array (flatten (:vertices model)))
+                     (float-array (flat-map (:text_coord model)))
+                     (float-array (flat-map (:normals model)))
+                     (int-array (flat-map (:faces model)))
+                     (int 0) (float-array (first (:rgb model))) (str "/ressources/" (:texture-name model)))))
+                      ;; this is a problem, it forces a value for the texture-name arg in createMesh call
+                      ;; with this code, texture usage is mandatory
 
 
-;;WARNING : Because of the  way we create meshes using an OBJ parser,
-;;          we had to replicate the signature of create-simple-mesh
-;;          to handle our model extracted from OBJ
-;;          Here we are pretending to use geometry (containing tris and vertices),
-;;          but we what we are actually giving is the model given by (yaw.loader/load-model objFilename)
+;;this function should not be used in yaw-react if you create meshes via the OBJ loader
+;; (because these meshes do not contain a geometry with tris and vertices)
 (defn create-simple-mesh!
-  "Create an item in the `world` from the specified mesh object"
-  [world geometry rgb]
-    (.createMesh world
-         (float-array (flatten (:vertices geometry)))
-         (float-array (flat-map (:text_coord geometry)))
-         (float-array (flat-map (:normals geometry)))
-         (int-array (flat-map (:faces geometry)))
-         (int 0) (float-array (first (:rgb geometry))) (str "/ressources/" (:texture-name geometry))))
-
-;;  We had to do this because, in yaw-reactive.scene (in group/add and item/add),
-;;  create-simple-mesh is called again and it tries to uses a mesh containing a geometry but there is none
-
-;;this function should not be used if you create meshes via the OBJ loader (these meshes do not contain a geometry with tris and vertices)
-(defn create-simple-mesh2!
   "Create an item in the `world` from the specified mesh object"
   [world & {:keys [geometry rgb]
             :or {geometry (yaw.mesh/box-geometry)
